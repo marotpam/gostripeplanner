@@ -33,28 +33,34 @@ func (s *Service) CopyAllProducts(src, dest string) error {
 
 	destProductsSvc := NewProductsService(destEnv)
 	for _, p := range productsInSrc {
-		params := &stripe.ProductParams{
-			Attrs:               p.Attrs,
-			Caption:             p.Caption,
-			DeactivateOn:        p.DeactivateOn,
-			Desc:                p.Desc,
-			ID:                  p.ID,
-			Images:              p.Images,
-			Name:                p.Name,
-			StatementDescriptor: p.StatementDescriptor,
-			Type:                p.Type,
-			URL:                 p.URL,
-		}
-		if p.Type == "good" {
-			params.Active = &p.Active
-			params.PackageDimensions = p.PackageDimensions
-			params.Shippable = &p.Shippable
-		}
+		s.copyProduct(p, destProductsSvc)
+	}
 
-		_, err := destProductsSvc.Add(params)
-		if err != nil {
-			fmt.Errorf("Error copying product of ID %s: %s\n", p.ID, err)
-		}
+	return nil
+}
+
+func (s *Service) copyProduct(p *stripe.Product, dest *productsService) error {
+	params := &stripe.ProductParams{
+		Attrs:               p.Attrs,
+		Caption:             p.Caption,
+		DeactivateOn:        p.DeactivateOn,
+		Desc:                p.Desc,
+		ID:                  p.ID,
+		Images:              p.Images,
+		Name:                p.Name,
+		StatementDescriptor: p.StatementDescriptor,
+		Type:                p.Type,
+		URL:                 p.URL,
+	}
+	if p.Type == "good" {
+		params.Active = &p.Active
+		params.PackageDimensions = p.PackageDimensions
+		params.Shippable = &p.Shippable
+	}
+
+	_, err := dest.Add(params)
+	if err != nil {
+		return err
 	}
 
 	return nil
