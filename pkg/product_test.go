@@ -1,6 +1,7 @@
 package pkg_test
 
 import (
+	"fmt"
 	"github.com/marotpam/gostripeplanner/pkg"
 	"github.com/stripe/stripe-go"
 	"reflect"
@@ -45,6 +46,30 @@ func TestProductCreation(t *testing.T) {
 
 	if !reflect.DeepEqual(newProduct, retrievedProduct) {
 		t.Error("Retrieved product is different than the one created")
+	}
+}
+
+func TestItCanPurgeTheProductCatalog(t *testing.T) {
+	ps := pkg.NewProductsService(localStripeEnvironment())
+
+	for i := 0; i < 10; i++ {
+		_, err := ps.Add(&stripe.ProductParams{Name: fmt.Sprintf("product with id %s", i), Type: "service"})
+		if err != nil {
+			t.Fatalf("Cannot create stripe product: %s", err)
+		}
+	}
+
+	if err := ps.Purge(); err != nil {
+		t.Errorf("Error purging products: %s", err)
+	}
+
+	products, err := ps.All()
+	if err != nil {
+		t.Errorf("Error retrieving products after purge: %s", err)
+	}
+
+	if len(products) != 0 {
+		t.Errorf("Should have 0 products after purging, %d found", len(products))
 	}
 }
 

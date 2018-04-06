@@ -40,3 +40,18 @@ func (ps *productsService) Add(pp *stripe.ProductParams) (*stripe.Product, error
 func (ps *productsService) GetByID(productID string) (*stripe.Product, error) {
 	return ps.stripeClient.Products.Get(productID, nil)
 }
+
+func (ps *productsService) Purge() error {
+	products, err := ps.All()
+	if err != nil {
+		return err
+	}
+
+	for _, p := range products {
+		if _, err := ps.stripeClient.Products.Del(p.ID, nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
