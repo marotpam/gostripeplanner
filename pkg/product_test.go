@@ -1,47 +1,47 @@
 package pkg_test
 
 import (
-	"testing"
 	"github.com/marotpam/gostripeplanner/pkg"
-	"github.com/stripe/stripe-go/client"
 	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/client"
 	"net/http"
-	"time"
 	"reflect"
+	"testing"
+	"time"
 )
 
 func TestItCanRetrieveAllProducts(t *testing.T) {
-	svc := pkg.NewService(localStripeClient())
+	ps := pkg.NewProductsService(localStripeClient())
 
-	productsBefore, err := svc.AllProducts()
+	productsBefore, err := ps.All()
 	if err != nil {
 		t.Error(err)
 	}
 
-	_, err = svc.AddProduct(&stripe.ProductParams{Name: "new product", Type: "service"})
+	_, err = ps.Add(&stripe.ProductParams{Name: "new product", Type: "service"})
 	if err != nil {
 		t.Fatalf("Cannot create stripe product: %s", err)
 	}
 
-	productsAfter, err := svc.AllProducts()
+	productsAfter, err := ps.All()
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(productsAfter) != len(productsBefore) + 1 {
+	if len(productsAfter) != len(productsBefore)+1 {
 		t.Error("List of products after should have increased by 1")
 	}
 }
 
 func TestProductCreation(t *testing.T) {
-	svc := pkg.NewService(localStripeClient())
+	ps := pkg.NewProductsService(localStripeClient())
 
-	newProduct, err := svc.AddProduct(&stripe.ProductParams{Name: "new product", Type: "service"})
+	newProduct, err := ps.Add(&stripe.ProductParams{Name: "new product", Type: "service"})
 	if err != nil {
 		t.Fatalf("Cannot create stripe product: %s", err)
 	}
 
-	retrievedProduct, err := svc.GetProductByID(newProduct.ID)
+	retrievedProduct, err := ps.GetByID(newProduct.ID)
 	if err != nil {
 		t.Fatalf("Error retrieving created product: %s", err)
 	}
