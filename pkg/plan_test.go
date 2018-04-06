@@ -25,3 +25,16 @@ func TestItCanCreatePlans(t *testing.T) {
 		t.Error("Product should not be nil after creation")
 	}
 }
+
+func TestItCanRetrieveAllPlansForAProduct(t *testing.T) {
+	svc := pkg.NewPlansService(pkg.NewMockedEnvironment("env", "http://0.0.0.0:8420/v1"))
+
+	ps, err := svc.FindForProduct("prod_123")
+	if err != nil {
+		t.Errorf("Error getting plans for product: %s", err)
+	}
+
+	if len(ps) == 0 {
+		t.Errorf("No plan was found")
+	}
+}
