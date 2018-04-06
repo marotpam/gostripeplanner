@@ -4,10 +4,8 @@ import (
 	"github.com/marotpam/gostripeplanner/pkg"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/client"
-	"net/http"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestItCanRetrieveAllProducts(t *testing.T) {
@@ -52,14 +50,6 @@ func TestProductCreation(t *testing.T) {
 }
 
 func localStripeClient() *client.API {
-	stripeClient := client.API{}
-	c := http.Client{Timeout: 30 * time.Second}
-	stripeClient.Init("sk_123", &stripe.Backends{
-		API: &stripe.BackendConfiguration{
-			stripe.APIBackend,
-			"http://0.0.0.0:8420/v1",
-			&c,
-		},
-	})
-	return &stripeClient
+	localStripeEnv := pkg.NewMockedEnvironment("mock", "http://0.0.0.0:8420/v1")
+	return localStripeEnv.GetClient()
 }
