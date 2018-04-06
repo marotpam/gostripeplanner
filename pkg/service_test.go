@@ -12,7 +12,7 @@ func TestItCanCopyAllProductsBetweenEnvironments(t *testing.T) {
 	destEnvironment := pkg.NewMockedEnvironment("dest", "http://0.0.0.0:8421/v1")
 
 	srcProductsSvc := pkg.NewProductsService(srcEnvironment)
-	sp, err := srcProductsSvc.Add(&stripe.ProductParams{Name: "product from source", Type: "service"})
+	sp, err := srcProductsSvc.Create(&stripe.ProductParams{Name: "product from source", Type: "service"})
 	if err != nil {
 		t.Fatalf("Error creating product in source: %s", err)
 	}

@@ -58,7 +58,7 @@ func (s *Service) copyProduct(p *stripe.Product, dest *productsService) error {
 		params.Shippable = &p.Shippable
 	}
 
-	_, err := dest.Add(params)
+	_, err := dest.Create(params)
 	if err != nil {
 		return err
 	}

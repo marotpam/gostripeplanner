@@ -16,7 +16,7 @@ func TestItCanRetrieveAllProducts(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = ps.Add(&stripe.ProductParams{Name: "new product", Type: "service"})
+	_, err = ps.Create(&stripe.ProductParams{Name: "new product", Type: "service"})
 	if err != nil {
 		t.Fatalf("Cannot create stripe product: %s", err)
 	}
@@ -34,7 +34,7 @@ func TestItCanRetrieveAllProducts(t *testing.T) {
 func TestProductCreation(t *testing.T) {
 	ps := pkg.NewProductsService(localStripeEnvironment())
 
-	newProduct, err := ps.Add(&stripe.ProductParams{Name: "new product", Type: "service"})
+	newProduct, err := ps.Create(&stripe.ProductParams{Name: "new product", Type: "service"})
 	if err != nil {
 		t.Fatalf("Cannot create stripe product: %s", err)
 	}
@@ -53,7 +53,7 @@ func TestItCanPurgeTheProductCatalog(t *testing.T) {
 	ps := pkg.NewProductsService(localStripeEnvironment())
 
 	for i := 0; i < 10; i++ {
-		_, err := ps.Add(&stripe.ProductParams{Name: fmt.Sprintf("product with id %s", i), Type: "service"})
+		_, err := ps.Create(&stripe.ProductParams{Name: fmt.Sprintf("product with id %s", i), Type: "service"})
 		if err != nil {
 			t.Fatalf("Cannot create stripe product: %s", err)
 		}

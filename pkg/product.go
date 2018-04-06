@@ -33,7 +33,7 @@ func (ps *productsService) All() ([]*stripe.Product, error) {
 	return pl, nil
 }
 
-func (ps *productsService) Add(pp *stripe.ProductParams) (*stripe.Product, error) {
+func (ps *productsService) Create(pp *stripe.ProductParams) (*stripe.Product, error) {
 	return ps.stripeClient.Products.New(pp)
 }
 
