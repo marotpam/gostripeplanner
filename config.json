@@ -1,0 +1,6 @@
+{
+  "envs": {
+    "test": "sk_test_123",
+    "live": "sk_live_456"
+  }
+}

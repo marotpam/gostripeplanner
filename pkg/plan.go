@@ -3,7 +3,6 @@ package pkg
 import (
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/client"
-	"log"
 )
 
 type plansService struct {
@@ -34,6 +33,6 @@ func (ps *plansService) FindForProduct(productID string) ([]*stripe.Plan, error)
 	if err := i.Err(); err != nil {
 		return nil, err
 	}
-	
+
 	return plans, nil
 }

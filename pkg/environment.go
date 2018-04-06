@@ -21,6 +21,14 @@ func NewMockedEnvironment(name, stripeMockURL string) *Environment {
 	}
 }
 
+func NewStripeEnvironment(name, key string) *Environment {
+	return &Environment{
+		Name: name,
+		Key:  key,
+		URL:  stripe.APIURL,
+	}
+}
+
 func (e *Environment) GetClient() *client.API {
 	stripeClient := client.API{}
 	c := http.Client{Timeout: 30 * time.Second}

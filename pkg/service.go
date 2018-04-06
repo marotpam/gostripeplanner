@@ -22,7 +22,7 @@ func (s *Service) CopyAllProducts(src, dest string) error {
 
 	destEnv, found := s.findEnvironment(dest)
 	if !found {
-		return errors.New(fmt.Sprintf("Src environment %s was not configured", src))
+		return errors.New(fmt.Sprintf("Dest environment %s was not configured", src))
 	}
 
 	srcProductsSvc := NewProductsService(srcEnv)
