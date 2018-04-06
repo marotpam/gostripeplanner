@@ -9,9 +9,9 @@ type productsService struct {
 	stripeClient *client.API
 }
 
-func NewProductsService(sc *client.API) *productsService {
+func NewProductsService(env *Environment) *productsService {
 	return &productsService{
-		sc,
+		env.GetClient(),
 	}
 }
 

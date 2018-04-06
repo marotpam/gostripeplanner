@@ -3,13 +3,12 @@ package pkg_test
 import (
 	"github.com/marotpam/gostripeplanner/pkg"
 	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/client"
 	"reflect"
 	"testing"
 )
 
 func TestItCanRetrieveAllProducts(t *testing.T) {
-	ps := pkg.NewProductsService(localStripeClient())
+	ps := pkg.NewProductsService(localStripeEnvironment())
 
 	productsBefore, err := ps.All()
 	if err != nil {
@@ -32,7 +31,7 @@ func TestItCanRetrieveAllProducts(t *testing.T) {
 }
 
 func TestProductCreation(t *testing.T) {
-	ps := pkg.NewProductsService(localStripeClient())
+	ps := pkg.NewProductsService(localStripeEnvironment())
 
 	newProduct, err := ps.Add(&stripe.ProductParams{Name: "new product", Type: "service"})
 	if err != nil {
@@ -49,7 +48,6 @@ func TestProductCreation(t *testing.T) {
 	}
 }
 
-func localStripeClient() *client.API {
-	localStripeEnv := pkg.NewMockedEnvironment("mock", "http://0.0.0.0:8420/v1")
-	return localStripeEnv.GetClient()
+func localStripeEnvironment() *pkg.Environment {
+	return pkg.NewMockedEnvironment("mock", "http://0.0.0.0:8420/v1")
 }
