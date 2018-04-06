@@ -47,7 +47,19 @@ func (ps *productsService) Purge() error {
 		return err
 	}
 
+	plansSvc := NewWithClient(ps.stripeClient)
 	for _, p := range products {
+		plans, err := plansSvc.FindForProduct(p.ID)
+		if err != nil {
+			return err
+		}
+
+		for _, pl := range plans {
+			if err := plansSvc.DeleteById(pl.ID); err != nil {
+				return err
+			}
+		}
+
 		if _, err := ps.stripeClient.Products.Del(p.ID, nil); err != nil {
 			return err
 		}

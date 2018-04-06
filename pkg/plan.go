@@ -15,6 +15,10 @@ func NewPlansService(env *Environment) *plansService {
 	}
 }
 
+func NewWithClient(c *client.API) *plansService {
+	return &plansService{c}
+}
+
 func (ps *plansService) Create(pp *stripe.PlanParams) (*stripe.Plan, error) {
 	return ps.stripeClient.Plans.New(pp)
 }
@@ -35,4 +39,13 @@ func (ps *plansService) FindForProduct(productID string) ([]*stripe.Plan, error)
 	}
 
 	return plans, nil
+}
+
+func (ps *plansService) GetById(planID string) (*stripe.Plan, error) {
+	return ps.stripeClient.Plans.Get(planID, nil)
+}
+
+func (ps *plansService) DeleteById(planID string) error {
+	_, err := ps.stripeClient.Plans.Del(planID, nil)
+	return err
 }

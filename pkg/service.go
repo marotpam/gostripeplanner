@@ -32,35 +32,73 @@ func (s *Service) CopyAllProducts(src, dest string) error {
 	}
 
 	destProductsSvc := NewProductsService(destEnv)
+	srcPlansSvc := NewPlansService(srcEnv)
+	destPlansSvc := NewPlansService(destEnv)
 	for _, p := range productsInSrc {
-		s.copyProduct(p, destProductsSvc)
-	}
+		prodParams := &stripe.ProductParams{
+			Attrs:               p.Attrs,
+			Caption:             p.Caption,
+			DeactivateOn:        p.DeactivateOn,
+			Desc:                p.Desc,
+			ID:                  p.ID,
+			Images:              p.Images,
+			Name:                p.Name,
+			StatementDescriptor: p.StatementDescriptor,
+			Type:                p.Type,
+			URL:                 p.URL,
+		}
+		if p.Type == stripe.ProductTypeGood {
+			prodParams.Active = &p.Active
+			prodParams.PackageDimensions = p.PackageDimensions
+			prodParams.Shippable = &p.Shippable
+		}
 
-	return nil
-}
+		destProduct, err := destProductsSvc.Create(prodParams)
+		if err != nil {
+			return err
+		}
 
-func (s *Service) copyProduct(p *stripe.Product, dest *productsService) error {
-	params := &stripe.ProductParams{
-		Attrs:               p.Attrs,
-		Caption:             p.Caption,
-		DeactivateOn:        p.DeactivateOn,
-		Desc:                p.Desc,
-		ID:                  p.ID,
-		Images:              p.Images,
-		Name:                p.Name,
-		StatementDescriptor: p.StatementDescriptor,
-		Type:                p.Type,
-		URL:                 p.URL,
-	}
-	if p.Type == "good" {
-		params.Active = &p.Active
-		params.PackageDimensions = p.PackageDimensions
-		params.Shippable = &p.Shippable
-	}
+		srcPlans, err := srcPlansSvc.FindForProduct(destProduct.ID)
+		if err != nil {
+			return err
+		}
 
-	_, err := dest.Create(params)
-	if err != nil {
-		return err
+		for _, sp := range srcPlans {
+			var planTiers []*stripe.PlanTierParams
+			for _, t := range sp.Tiers {
+				planTiers = append(planTiers, &stripe.PlanTierParams{Amount: t.Amount, UpTo: t.UpTo})
+			}
+
+			var transformUsage *stripe.PlanTransformUsageParams
+			if sp.TransformUsage != nil {
+				transformUsage = &stripe.PlanTransformUsageParams{
+					DivideBy: sp.TransformUsage.DivideBy,
+					Round:    sp.TransformUsage.Round,
+				}
+			}
+
+			planParams := &stripe.PlanParams{
+				Amount:         sp.Amount,
+				AmountZero:     sp.Amount == 0,
+				BillingScheme:  sp.BillingScheme,
+				Currency:       sp.Currency,
+				ID:             sp.ID,
+				Interval:       sp.Interval,
+				IntervalCount:  sp.IntervalCount,
+				Nickname:       sp.Nickname,
+				ProductID:      &p.ID,
+				Tiers:          planTiers,
+				TiersMode:      sp.TiersMode,
+				TransformUsage: transformUsage,
+				TrialPeriod:    sp.TrialPeriod,
+				UsageType:      sp.UsageType,
+			}
+
+			_, err := destPlansSvc.Create(planParams)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

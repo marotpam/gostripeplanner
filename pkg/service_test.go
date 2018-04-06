@@ -12,9 +12,20 @@ func TestItCanCopyAllProductsBetweenEnvironments(t *testing.T) {
 	destEnvironment := pkg.NewMockedEnvironment("dest", "http://0.0.0.0:8421/v1")
 
 	srcProductsSvc := pkg.NewProductsService(srcEnvironment)
-	sp, err := srcProductsSvc.Create(&stripe.ProductParams{Name: "product from source", Type: "service"})
+	srcProduct, err := srcProductsSvc.Create(&stripe.ProductParams{Name: "product from source", Type: "service"})
 	if err != nil {
 		t.Fatalf("Error creating product in source: %s", err)
+	}
+
+	srcPlansSvc := pkg.NewPlansService(srcEnvironment)
+	srcPlan, err := srcPlansSvc.Create(&stripe.PlanParams{
+		Amount:    5000,
+		Currency:  "eur",
+		ProductID: &srcProduct.ID,
+		Interval:  "month",
+	})
+	if err != nil {
+		t.Fatalf("Error creating plan in src: %s", err)
 	}
 
 	svc := pkg.NewService([]*pkg.Environment{srcEnvironment, destEnvironment})
@@ -25,12 +36,22 @@ func TestItCanCopyAllProductsBetweenEnvironments(t *testing.T) {
 	}
 
 	destProductsSvc := pkg.NewProductsService(destEnvironment)
-	dp, err := destProductsSvc.GetByID(sp.ID)
+	destProduct, err := destProductsSvc.GetByID(srcProduct.ID)
 	if err != nil {
 		t.Errorf("Error retrieving product copied from src: %s", err)
 	}
 
-	if !reflect.DeepEqual(sp, dp) {
+	if !reflect.DeepEqual(srcProduct, destProduct) {
 		t.Errorf("Product should be the same in source environment than dest environment")
+	}
+
+	destPlansSvc := pkg.NewPlansService(destEnvironment)
+	destPlan, err := destPlansSvc.GetById(srcPlan.ID)
+	if err != nil {
+		t.Errorf("Error retrieving plan copied from src: %s", err)
+	}
+
+	if !reflect.DeepEqual(srcPlan, destPlan) {
+		t.Errorf("Plan should be the same in source environment than dest environment")
 	}
 }
